@@ -1,22 +1,25 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-exports.handler = async () => {
+export async function handler() {
   try {
-    const postsDir = path.join(__dirname, "../../posts");
+    const postsDir = path.join(process.cwd(), "posts");
     const files = fs.readdirSync(postsDir);
-    const posts = files
-      .filter(file => file.endsWith(".json"))
-      .map(file => {
-        const content = fs.readFileSync(path.join(postsDir, file));
-        return JSON.parse(content);
-      });
+
+    const posts = files.map(file => {
+      const filePath = path.join(postsDir, file);
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      return data;
+    });
 
     return {
       statusCode: 200,
       body: JSON.stringify(posts)
     };
-  } catch (error) {
-    return { statusCode: 500, body: "Error: " + error.message };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
-};
+}
